@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="HTV HR">
+<meta name="theme-color" content="#1F4E79">
+<title>HTV HR</title>
+<link rel="apple-touch-icon" sizes="180x180"
+      href="https://lh3.googleusercontent.com/d/1XXbdoGTqfp6bRR_baYsr0GvQ8uRei4d_">
+<link rel="icon" type="image/png"
+      href="https://lh3.googleusercontent.com/d/1NmEtOM0IPmywMgJoaFKmSWCzNIWRTtJF">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;overflow:hidden;background:#F4F6F9}
+  iframe{width:100%;height:100%;border:none;display:block}
+  #tai{
+    position:fixed;inset:0;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+    background:linear-gradient(150deg,#FEFCF8,#F6EFE3,#EDE0CC);
+    font-family:'Segoe UI',system-ui,Arial,sans-serif;z-index:10
+  }
+  #tai img{width:96px;height:96px;object-fit:contain;margin-bottom:18px}
+  #tai .vong{
+    width:38px;height:38px;border:3px solid rgba(31,78,121,.2);
+    border-top-color:#1F4E79;border-radius:50%;animation:quay .9s linear infinite
+  }
+  @keyframes quay{to{transform:rotate(360deg)}}
+  #tai p{margin-top:14px;font-size:13px;color:#7F8C8D}
+</style>
+</head>
+<body>
+
+<div id="tai">
+  <img src="https://lh3.googleusercontent.com/d/1IU0gpNl0tcK-9drj2r2FkL2QfykBtjZd" alt="HTV">
+  <div class="vong"></div>
+  <p>Đang mở Cổng Thông tin Nhân sự...</p>
+</div>
+
+<iframe id="app" src="https://script.google.com/macros/s/AKfycbwT6PZZ1WDmBrAE6g3vfKuQAkbnL7oVuXJfuw2hc-rDLId1L4ONZzfzXduaYDLYZoXI3Q/exec"
+        allow="clipboard-write; geolocation"
+        onload="document.getElementById('tai').style.display='none'"></iframe>
+
+</body>
+</html>
