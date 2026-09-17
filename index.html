@@ -13,6 +13,10 @@
   <meta name="apple-mobile-web-app-title" content="HTV HR">
   <meta name="theme-color" content="#EDE0CC">
 
+  <link rel="preconnect" href="https://script.google.com">
+  <link rel="preconnect" href="https://script.googleusercontent.com">
+  <link rel="preconnect" href="https://lh3.googleusercontent.com">
+
   <title>HTV HR</title>
 
   <link
@@ -391,24 +395,38 @@
       );
 
 
+      /*
+       * Khi Apps Script tải xong thì mở app ngay.
+       * Không chờ 15 giây fallback nữa.
+       *
+       * Phần Index Apps Script hiện đã tự reset toàn bộ modal,
+       * nên không cần ép URL mới bằng timestamp ở mỗi lần mở.
+       */
+      app.addEventListener(
+        'load',
+        function () {
+          setTimeout(moApp, 120);
+        },
+        { once: true }
+      );
+
+
+      /*
+       * Dùng URL deployment ổn định để trình duyệt có thể tận dụng
+       * kết nối/cache thay vì ép tải mới hoàn toàn mỗi lần.
+       */
+      app.src = APP_URL;
+
       khung.appendChild(app);
 
 
       /*
-       * Cache-busting để không phục hồi DOM iframe cũ.
-       */
-      app.src =
-        APP_URL
-        + '?htv_fresh='
-        + Date.now();
-
-
-      /*
-       * Fallback nếu WebView chặn postMessage.
+       * Fallback cuối cùng nếu WebView rất bất thường.
+       * Bình thường sẽ không bao giờ phải đợi tới mốc này.
        */
       setTimeout(
         moApp,
-        15000
+        8000
       );
 
     })();
