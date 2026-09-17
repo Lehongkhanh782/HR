@@ -53,6 +53,32 @@
 (function () {
   var LINK_APP = 'https://script.google.com/macros/s/AKfycbwT6PZZ1WDmBrAE6g3vfKuQAkbnL7oVuXJfuw2hc-rDLId1L4ONZzfzXduaYDLYZoXI3Q/exec';
 
+  /* ===== GHI NHỚ ĐĂNG NHẬP: cất mã phiên của hệ thống trên thiết bị này ===== */
+  var KHOA_PHIEN = 'htv_phien_v1';
+
+  // Chỉ trao đổi với nội dung của Google Apps Script (hệ thống nhân sự)
+  function nguonHopLe(nguon) {
+    return /^https:\/\/[a-z0-9-]+\.googleusercontent\.com$/.test(nguon)
+        || /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(nguon);
+  }
+
+  window.addEventListener('message', function (e) {
+    var d = e.data;
+    if (!d || typeof d.type !== 'string' || !e.source || !nguonHopLe(e.origin)) return;
+    try {
+      if (d.type === 'HTV_XIN_PHIEN') {
+        var token = '';
+        try { token = localStorage.getItem(KHOA_PHIEN) || ''; } catch (x) {}
+        e.source.postMessage({ type: 'HTV_PHIEN', token: token }, e.origin);
+      } else if (d.type === 'HTV_LUU_PHIEN' && d.token) {
+        localStorage.setItem(KHOA_PHIEN, String(d.token));
+      } else if (d.type === 'HTV_XOA_PHIEN') {
+        localStorage.removeItem(KHOA_PHIEN);
+      }
+    } catch (x) {}
+  });
+
+  /* ===== KÍCH THƯỚC KHUNG ===== */
   var khung = document.getElementById('app');
   var laAppIOS = window.navigator.standalone === true;   // iPhone/iPad mở từ màn hình chính
   var daDat = 0;
