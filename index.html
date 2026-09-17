@@ -15,14 +15,18 @@
       href="https://lh3.googleusercontent.com/d/1NmEtOM0IPmywMgJoaFKmSWCzNIWRTtJF">
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
-  html,body{width:100%;height:100%;overflow:hidden;background:#F4F6F9}
 
-  /* Khung hệ thống phủ kín màn hình, kể cả vùng giờ/pin */
-  #app{position:fixed;top:0;left:0;width:100%;height:100vh;border:none;display:block}
+  /* Trang ngoài: không cố định chiều cao, không cuộn */
+  html{overflow:hidden;background:#F4F6F9}
+  body{background:#F4F6F9}
 
-  /* Ô vô hình dùng để đo vùng giờ/pin và vùng vạch vuốt đáy */
+  /* Khung hệ thống nằm bình thường trong trang, KHÔNG dùng position:fixed
+     vì iOS 26 có lỗi: khung cố định không phủ được phần đáy màn hình */
+  #app{display:block;width:100%;height:100vh;border:none}
+
+  /* Ô vô hình dùng để đo vùng giờ/pin */
   #doVung{
-    position:fixed;top:0;left:0;width:0;height:0;visibility:hidden;
+    position:absolute;top:0;left:0;width:0;height:0;visibility:hidden;
     padding-top:env(safe-area-inset-top,0px);
     padding-bottom:env(safe-area-inset-bottom,0px)
   }
