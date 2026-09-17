@@ -346,66 +346,79 @@
 
 
   <!-- ================= ỨNG DỤNG HRM ================= -->
-  <iframe
-    id="app"
-
-    src="https://script.google.com/macros/s/AKfycbwT6PZZ1WDmBrAE6g3vfKuQAkbnL7oVuXJfuw2hc-rDLId1L4ONZzfzXduaYDLYZoXI3Q/exec"
-
-    allow="clipboard-write; geolocation"
-
-    title="Cổng Thông tin Nhân sự HTV"
-  ></iframe>
+<iframe
+  id="app"
+  src="https://script.google.com/macros/s/AKfycbwT6PZZ1WDmBrAE6g3vfKuQAkbnL7oVuXJfuw2hc-rDLId1L4ONZzfzXduaYDLYZoXI3Q/exec"
+  allow="clipboard-write; geolocation"
+  title="Cổng Thông tin Nhân sự HTV"
+></iframe>
 
 
-  <script>
-    (function () {
+<script>
+  (function () {
 
-      var app = document.getElementById('app');
-      var tai = document.getElementById('tai');
+    var app = document.getElementById('app');
+    var tai = document.getElementById('tai');
+
+    var daMoApp = false;
 
 
-      function appDaTai() {
+    function hienApp() {
 
-        /*
-         * Cho iframe hiện trước.
-         * Giữ loading thêm một khoảng cực ngắn để tránh
-         * flash trắng giữa hai giao diện.
-         */
-        app.classList.add('daTai');
+      if (daMoApp) return;
+
+      daMoApp = true;
+
+      // Iframe đã reset xong giao diện thì mới cho hiện
+      app.classList.add('daTai');
+
+      requestAnimationFrame(function () {
 
         requestAnimationFrame(function () {
 
-          requestAnimationFrame(function () {
-
-            setTimeout(function () {
-              tai.classList.add('anTai');
-            }, 120);
-
-          });
+          setTimeout(function () {
+            tai.classList.add('anTai');
+          }, 100);
 
         });
+
+      });
+    }
+
+
+    /*
+     * Không dùng iframe.onload để ẩn loading nữa.
+     * onload có thể xảy ra trước khi Apps Script reset DOM cũ.
+     *
+     * Chỉ khi Apps Script gửi HTV_HRM_READY
+     * thì mới mở giao diện.
+     */
+    window.addEventListener('message', function (event) {
+
+      if (event.source !== app.contentWindow) {
+        return;
       }
 
+      if (
+        event.data &&
+        event.data.type === 'HTV_HRM_READY'
+      ) {
+        hienApp();
+      }
 
-      app.addEventListener('load', appDaTai);
+    });
 
 
-      /*
-       * Fallback:
-       * nếu vì lý do nào đó sự kiện load hoạt động khác
-       * trên một số WebView, màn chờ cũng không treo vô hạn.
-       */
-      setTimeout(function () {
+    /*
+     * Fallback phòng trường hợp postMessage không tới được
+     * trên một WebView đặc biệt.
+     */
+    setTimeout(function () {
+      hienApp();
+    }, 12000);
 
-        if (!app.classList.contains('daTai')) {
-          app.classList.add('daTai');
-          tai.classList.add('anTai');
-        }
-
-      }, 15000);
-
-    })();
-  </script>
+  })();
+</script>
 
 </body>
 </html>
