@@ -320,6 +320,10 @@
 
       var daSanSang = false;
 
+      // Giữ màn logo/loading tối thiểu 750ms để tránh cảm giác nháy.
+      var BAT_DAU_LOADING = Date.now();
+      var THOI_GIAN_LOADING_TOI_THIEU = 750;
+
 
       app.id = 'app';
 
@@ -338,21 +342,32 @@
 
         daSanSang = true;
 
-        app.classList.add('daTai');
+        var daCho = Date.now() - BAT_DAU_LOADING;
+        var conPhaiCho = Math.max(
+          0,
+          THOI_GIAN_LOADING_TOI_THIEU - daCho
+        );
 
-        requestAnimationFrame(function () {
+        setTimeout(function () {
+
+          // Cho iframe hiện trước rồi mới fade loading ra.
+          app.classList.add('daTai');
 
           requestAnimationFrame(function () {
 
-            setTimeout(function () {
+            requestAnimationFrame(function () {
 
-              tai.classList.add('anTai');
+              setTimeout(function () {
 
-            }, 100);
+                tai.classList.add('anTai');
+
+              }, 120);
+
+            });
 
           });
 
-        });
+        }, conPhaiCho);
 
       }
 
