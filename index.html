@@ -45,12 +45,10 @@
 
     :root {
       --shell-bg:#F6EFE3;
-      --safe-top:#FEFCF8;
     }
 
     html[data-screen="main"] {
       --shell-bg:#F4F6F9;
-      --safe-top:#6B2434;
     }
 
     html,
@@ -84,35 +82,24 @@
     #khungApp {
       position:fixed;
 
-      top:env(safe-area-inset-top, 0px);
+      /*
+       * TOP giữ nguyên như trước.
+       * Chỉ xử lý phần đáy iPhone.
+       */
+      top:0;
       right:0;
-      bottom:0;
       left:0;
+
+      /*
+       * Kéo iframe xuống dưới mép viewport đúng bằng safe-area đáy.
+       * Nhờ vậy nội dung không dừng trước vùng Home Indicator.
+       */
+      bottom:calc(0px - env(safe-area-inset-bottom, 0px));
 
       z-index:1;
       overflow:hidden;
 
       background:#F4F6F9;
-    }
-
-    /*
-     * Vùng status bar phía trên.
-     * Iframe bắt đầu ngay dưới status bar để giờ / Wi-Fi /
-     * pin không còn đè lên header HRM.
-     */
-    #safeTop {
-      position:fixed;
-
-      top:0;
-      right:0;
-      left:0;
-
-      height:env(safe-area-inset-top, 0px);
-
-      z-index:2;
-      pointer-events:none;
-
-      background:var(--safe-top);
     }
 
     #app {
@@ -143,7 +130,11 @@
      */
     #tai {
       position:fixed;
-      inset:0;
+
+      top:0;
+      right:0;
+      left:0;
+      bottom:calc(0px - env(safe-area-inset-bottom, 0px));
 
       z-index:999999;
 
@@ -158,8 +149,7 @@
       padding-right:
         max(20px, env(safe-area-inset-right, 0px));
 
-      padding-bottom:
-        max(20px, env(safe-area-inset-bottom, 0px));
+      padding-bottom:20px;
 
       padding-left:
         max(20px, env(safe-area-inset-left, 0px));
@@ -264,8 +254,6 @@
 </head>
 
 <body>
-
-  <div id="safeTop"></div>
 
   <div id="tai">
     <div class="logoTai">
