@@ -12,9 +12,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="HTV HR">
-  <meta name="theme-color" content="#EDE0CC">
+  <meta name="theme-color" content="#F6EFE3">
 
-  <!-- Mở kết nối tới Google sớm, đặc biệt có lợi trên 4G/5G -->
   <link rel="preconnect" href="https://script.google.com">
   <link rel="preconnect" href="https://script.googleusercontent.com">
   <link rel="preconnect" href="https://lh3.googleusercontent.com">
@@ -39,40 +38,30 @@
 
   <style>
     * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
     }
 
     :root {
-      --shell-bg: #F6EFE3;
-      --shell-top: #F6EFE3;
-      --shell-bottom: #EDE0CC;
+      --vv-top:0px;
+      --vv-left:0px;
+      --vv-width:100vw;
+      --vv-height:100vh;
+      --shell-bg:#F6EFE3;
     }
 
     html[data-screen="main"] {
-      --shell-bg: #F4F6F9;
-      --shell-top: #6B2434;
-      --shell-bottom: #F4F6F9;
+      --shell-bg:#F4F6F9;
     }
 
-    html {
-      width: 100%;
-      height: 100%;
-      min-height: 100%;
-      background: var(--shell-bg);
-      overflow: hidden;
-    }
-
+    html,
     body {
-      width: 100%;
-      height: 100%;
-      min-height: 100%;
-      margin: 0;
-
-      overflow: hidden;
-      overscroll-behavior: none;
-
+      width:100%;
+      height:100%;
+      margin:0;
+      overflow:hidden;
+      background:var(--shell-bg);
       font-family:
         'Segoe UI',
         system-ui,
@@ -80,73 +69,58 @@
         BlinkMacSystemFont,
         Arial,
         sans-serif;
-
-      background: var(--shell-bg);
-
-      -webkit-text-size-adjust: 100%;
+      -webkit-text-size-adjust:100%;
     }
 
     /*
-     * Không ép 100dvh trên lớp fixed.
-     * inset:0 phủ đúng viewport thực + safe-area iPhone.
+     * Không dùng inset:0 + 100dvh nữa.
+     * Kích thước được JavaScript đồng bộ trực tiếp với visualViewport.
      */
     #khungApp,
     #tai {
-      position: fixed;
-      inset: 0;
+      position:fixed;
+      top:var(--vv-top);
+      left:var(--vv-left);
+      width:var(--vv-width);
+      height:var(--vv-height);
     }
 
     #khungApp {
-      overflow: hidden;
-      z-index: 1;
-
-      background: var(--shell-bg);
+      z-index:1;
+      overflow:hidden;
+      background:var(--shell-bg);
     }
 
     #app {
-      position: absolute;
-      inset: 0;
-      z-index: 1;
-
-      display: block;
-
-      width: 100%;
-      height: 100%;
-
-      border: 0;
-      outline: 0;
-
-      background: #F4F6F9;
-
-      opacity: 0;
-      transition: opacity .16s ease;
+      position:absolute;
+      inset:0;
+      display:block;
+      width:100%;
+      height:100%;
+      border:0;
+      outline:0;
+      background:#F4F6F9;
+      opacity:0;
+      transition:opacity .16s ease;
     }
 
     #app.daTai {
-      opacity: 1;
+      opacity:1;
     }
 
     #tai {
-      z-index: 999999;
+      z-index:999999;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
 
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      padding-top:max(20px, env(safe-area-inset-top, 0px));
+      padding-right:max(20px, env(safe-area-inset-right, 0px));
+      padding-bottom:max(20px, env(safe-area-inset-bottom, 0px));
+      padding-left:max(20px, env(safe-area-inset-left, 0px));
 
-      padding-top:
-        max(20px, env(safe-area-inset-top, 0px));
-
-      padding-right:
-        max(20px, env(safe-area-inset-right, 0px));
-
-      padding-bottom:
-        max(20px, calc(20px + env(safe-area-inset-bottom, 0px)));
-
-      padding-left:
-        max(20px, env(safe-area-inset-left, 0px));
-
-      overflow: hidden;
+      overflow:hidden;
 
       background:
         radial-gradient(
@@ -166,8 +140,8 @@
           #EDE0CC 100%
         );
 
-      opacity: 1;
-      visibility: visible;
+      opacity:1;
+      visibility:visible;
 
       transition:
         opacity .18s ease,
@@ -175,104 +149,69 @@
     }
 
     #tai.anTai {
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
+      opacity:0;
+      visibility:hidden;
+      pointer-events:none;
     }
 
     #tai .logoTai {
-      width: 100px;
-      height: 100px;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      margin-bottom: 20px;
+      width:100px;
+      height:100px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      margin-bottom:20px;
     }
 
     #tai .logoTai img {
-      display: block;
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
+      display:block;
+      width:100%;
+      height:100%;
+      object-fit:contain;
     }
 
     #tai .vong {
-      width: 38px;
-      height: 38px;
-
-      border: 3px solid rgba(31,78,121,.16);
-      border-top-color: #1F4E79;
-      border-radius: 50%;
-
-      animation: quay .8s linear infinite;
+      width:38px;
+      height:38px;
+      border:3px solid rgba(31,78,121,.16);
+      border-top-color:#1F4E79;
+      border-radius:50%;
+      animation:quay .8s linear infinite;
     }
 
     @keyframes quay {
-      to { transform: rotate(360deg); }
+      to { transform:rotate(360deg); }
     }
 
     #tai p {
-      margin-top: 14px;
-
-      font-size: 13px;
-      font-weight: 500;
-
-      color: #7F8C8D;
-
-      text-align: center;
-      line-height: 1.5;
+      margin-top:14px;
+      font-size:13px;
+      font-weight:500;
+      color:#7F8C8D;
+      text-align:center;
+      line-height:1.5;
     }
 
-    /*
-     * Hai lớp này chỉ là nền dự phòng phía SAU iframe.
-     * Không phủ lên nội dung vì z-index thấp hơn #khungApp.
-     */
-    #nenSafeTren,
-    #nenSafeDuoi {
-      position: fixed;
-      left: 0;
-      right: 0;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    #nenSafeTren {
-      top: 0;
-      height: max(env(safe-area-inset-top, 0px), 1px);
-      background: var(--shell-top);
-    }
-
-    #nenSafeDuoi {
-      bottom: 0;
-      height: max(env(safe-area-inset-bottom, 0px), 1px);
-      background: var(--shell-bottom);
-    }
-
-    @media (max-width: 600px) {
+    @media (max-width:600px) {
       #tai .logoTai {
-        width: 88px;
-        height: 88px;
-        margin-bottom: 18px;
+        width:88px;
+        height:88px;
+        margin-bottom:18px;
       }
 
       #tai .vong {
-        width: 34px;
-        height: 34px;
+        width:34px;
+        height:34px;
       }
 
       #tai p {
-        font-size: 12.5px;
+        font-size:12.5px;
       }
     }
   </style>
 </head>
 
 <body>
-
-  <div id="nenSafeTren"></div>
-  <div id="nenSafeDuoi"></div>
 
   <div id="tai">
     <div class="logoTai">
@@ -300,39 +239,164 @@
       var APP_URL =
         'https://script.google.com/macros/s/AKfycbwT6PZZ1WDmBrAE6g3vfKuQAkbnL7oVuXJfuw2hc-rDLId1L4ONZzfzXduaYDLYZoXI3Q/exec';
 
+      /*
+       * =====================================================
+       * MOBILE BROWSER
+       * =====================================================
+       *
+       * Safari/Chrome điện thoại không cuộn top-level khi người
+       * dùng đang cuộn trong iframe cross-origin. Vì vậy thanh
+       * trình duyệt có thể không thu lại đúng cách.
+       *
+       * Trên điện thoại mở bằng browser thông thường:
+       * chuyển Apps Script thành TOP-LEVEL page.
+       *
+       * Khi mở từ icon Home Screen:
+       * giữ wrapper để vẫn có trải nghiệm app/branding.
+       */
+      var laStandalone =
+        window.matchMedia('(display-mode: standalone)').matches ||
+        window.navigator.standalone === true;
+
+      var laDienThoai =
+        window.matchMedia('(max-width: 820px)').matches &&
+        (
+          'ontouchstart' in window ||
+          navigator.maxTouchPoints > 0
+        );
+
+      if (laDienThoai && !laStandalone) {
+        window.location.replace(APP_URL);
+        return;
+      }
+
+
+      var root = document.documentElement;
       var khung = document.getElementById('khungApp');
       var tai = document.getElementById('tai');
       var metaTheme = document.querySelector('meta[name="theme-color"]');
 
       var app = document.createElement('iframe');
 
+      var daMoApp = false;
+      var batDau = Date.now();
+      var loadingToiThieu = 500;
+
+      var rafViewport = 0;
+
+
+      /*
+       * =====================================================
+       * IPHONE / ANDROID VIEWPORT
+       * =====================================================
+       *
+       * Bám trực tiếp visualViewport thay vì dựa vào
+       * vh / svh / dvh của WebKit.
+       */
+      function dongBoViewport() {
+
+        if (rafViewport) {
+          cancelAnimationFrame(rafViewport);
+        }
+
+        rafViewport = requestAnimationFrame(function () {
+
+          var vv = window.visualViewport;
+
+          var top = vv ? vv.offsetTop : 0;
+          var left = vv ? vv.offsetLeft : 0;
+          var width = vv ? vv.width : window.innerWidth;
+          var height = vv ? vv.height : window.innerHeight;
+
+          root.style.setProperty(
+            '--vv-top',
+            Math.round(top) + 'px'
+          );
+
+          root.style.setProperty(
+            '--vv-left',
+            Math.round(left) + 'px'
+          );
+
+          root.style.setProperty(
+            '--vv-width',
+            Math.ceil(width) + 'px'
+          );
+
+          root.style.setProperty(
+            '--vv-height',
+            Math.ceil(height) + 'px'
+          );
+
+        });
+      }
+
+
+      dongBoViewport();
+
+      window.addEventListener(
+        'resize',
+        dongBoViewport,
+        { passive:true }
+      );
+
+      window.addEventListener(
+        'orientationchange',
+        function () {
+          dongBoViewport();
+
+          setTimeout(dongBoViewport, 100);
+          setTimeout(dongBoViewport, 300);
+          setTimeout(dongBoViewport, 700);
+        },
+        { passive:true }
+      );
+
+      window.addEventListener(
+        'pageshow',
+        function () {
+          dongBoViewport();
+          setTimeout(dongBoViewport, 100);
+        }
+      );
+
+
+      if (window.visualViewport) {
+
+        window.visualViewport.addEventListener(
+          'resize',
+          dongBoViewport,
+          { passive:true }
+        );
+
+        window.visualViewport.addEventListener(
+          'scroll',
+          dongBoViewport,
+          { passive:true }
+        );
+
+      }
+
+
       function datTrangThaiManHinh(screen) {
+
         var laMain = screen === 'main';
 
-        document.documentElement.setAttribute(
+        root.setAttribute(
           'data-screen',
           laMain ? 'main' : 'login'
         );
 
-        /*
-         * Safari dùng theme-color cho một phần UI trình duyệt.
-         * Main ưu tiên nền xám để vùng dưới không còn thành dải be.
-         */
         if (metaTheme) {
           metaTheme.setAttribute(
             'content',
-            laMain ? '#F4F6F9' : '#F6EFE3'
+            laMain ? '#6B2434' : '#F6EFE3'
           );
         }
       }
 
+
       datTrangThaiManHinh('login');
-
-      var daMoApp = false;
-
-      // Đủ để logo không nháy nhưng không tạo cảm giác chờ.
-      var BAT_DAU = Date.now();
-      var LOADING_TOI_THIEU = 500;
 
 
       app.id = 'app';
@@ -354,13 +418,16 @@
         if (daMoApp) return;
         daMoApp = true;
 
-        var daCho = Date.now() - BAT_DAU;
+        var daCho = Date.now() - batDau;
+
         var conCho = Math.max(
           0,
-          LOADING_TOI_THIEU - daCho
+          loadingToiThieu - daCho
         );
 
         setTimeout(function () {
+
+          dongBoViewport();
 
           app.classList.add('daTai');
 
@@ -380,22 +447,11 @@
       }
 
 
-      /*
-       * Tín hiệu chính.
-       *
-       * Apps Script có thể có thêm iframe trung gian của Google,
-       * vì vậy KHÔNG khóa event.source === app.contentWindow.
-       *
-       * Chỉ nhận READY từ domain Google Apps Script /
-       * Googleusercontent để tránh message ngoài ý muốn.
-       */
       window.addEventListener(
         'message',
         function (event) {
 
-          if (!event.data) {
-            return;
-          }
+          if (!event.data) return;
 
           var origin = String(event.origin || '');
 
@@ -403,49 +459,40 @@
             origin === 'https://script.google.com' ||
             /^https:\/\/[^/]*googleusercontent\.com$/i.test(origin);
 
-          if (!laGoogle) {
-            return;
-          }
+          if (!laGoogle) return;
+
 
           if (event.data.type === 'HTV_HRM_SCREEN') {
             datTrangThaiManHinh(event.data.screen);
+            dongBoViewport();
             return;
           }
 
+
           if (event.data.type === 'HTV_HRM_READY') {
+            dongBoViewport();
             moApp();
           }
+
         }
       );
 
 
-      /*
-       * Fallback 1:
-       * nếu browser không chuyển postMessage từ nested iframe,
-       * onload của iframe vẫn mở được app.
-       */
       app.addEventListener(
         'load',
         function () {
+          dongBoViewport();
           setTimeout(moApp, 80);
         },
-        { once: true }
+        { once:true }
       );
 
 
-      /*
-       * Không gắn timestamp vào URL.
-       * Giữ URL ổn định để điện thoại tận dụng DNS/TLS/cache.
-       */
       app.src = APP_URL;
 
       khung.appendChild(app);
 
 
-      /*
-       * Fallback cuối cùng.
-       * Bình thường READY/onload sẽ chạy trước rất lâu.
-       */
       setTimeout(
         moApp,
         6000
