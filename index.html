@@ -44,15 +44,13 @@
     }
 
     :root {
-      --vv-top:0px;
-      --vv-left:0px;
-      --vv-width:100vw;
-      --vv-height:100vh;
       --shell-bg:#F6EFE3;
+      --safe-top:#FEFCF8;
     }
 
     html[data-screen="main"] {
       --shell-bg:#F4F6F9;
+      --safe-top:#6B2434;
     }
 
     html,
@@ -60,8 +58,11 @@
       width:100%;
       height:100%;
       margin:0;
+      padding:0;
       overflow:hidden;
+
       background:var(--shell-bg);
+
       font-family:
         'Segoe UI',
         system-ui,
@@ -69,37 +70,65 @@
         BlinkMacSystemFont,
         Arial,
         sans-serif;
+
       -webkit-text-size-adjust:100%;
     }
 
     /*
-     * Không dùng inset:0 + 100dvh nữa.
-     * Kích thước được JavaScript đồng bộ trực tiếp với visualViewport.
+     * QUAN TRỌNG:
+     * Không dùng visualViewport, 100dvh, 100svh.
+     *
+     * bottom:0 khiến iframe kéo THẬT SỰ tới đáy layout viewport,
+     * bao gồm vùng Home Indicator của iPhone.
      */
-    #khungApp,
-    #tai {
-      position:fixed;
-      top:var(--vv-top);
-      left:var(--vv-left);
-      width:var(--vv-width);
-      height:var(--vv-height);
-    }
-
     #khungApp {
+      position:fixed;
+
+      top:env(safe-area-inset-top, 0px);
+      right:0;
+      bottom:0;
+      left:0;
+
       z-index:1;
       overflow:hidden;
-      background:var(--shell-bg);
+
+      background:#F4F6F9;
+    }
+
+    /*
+     * Vùng status bar phía trên.
+     * Iframe bắt đầu ngay dưới status bar để giờ / Wi-Fi /
+     * pin không còn đè lên header HRM.
+     */
+    #safeTop {
+      position:fixed;
+
+      top:0;
+      right:0;
+      left:0;
+
+      height:env(safe-area-inset-top, 0px);
+
+      z-index:2;
+      pointer-events:none;
+
+      background:var(--safe-top);
     }
 
     #app {
       position:absolute;
       inset:0;
+
       display:block;
+
       width:100%;
       height:100%;
+
       border:0;
       outline:0;
+
       background:#F4F6F9;
+
       opacity:0;
       transition:opacity .16s ease;
     }
@@ -108,17 +137,32 @@
       opacity:1;
     }
 
+    /*
+     * Loading phải phủ TOÀN BỘ màn hình PWA,
+     * không dừng trước safe-area đáy.
+     */
     #tai {
+      position:fixed;
+      inset:0;
+
       z-index:999999;
+
       display:flex;
       flex-direction:column;
       align-items:center;
       justify-content:center;
 
-      padding-top:max(20px, env(safe-area-inset-top, 0px));
-      padding-right:max(20px, env(safe-area-inset-right, 0px));
-      padding-bottom:max(20px, env(safe-area-inset-bottom, 0px));
-      padding-left:max(20px, env(safe-area-inset-left, 0px));
+      padding-top:
+        max(20px, env(safe-area-inset-top, 0px));
+
+      padding-right:
+        max(20px, env(safe-area-inset-right, 0px));
+
+      padding-bottom:
+        max(20px, env(safe-area-inset-bottom, 0px));
+
+      padding-left:
+        max(20px, env(safe-area-inset-left, 0px));
 
       overflow:hidden;
 
@@ -157,9 +201,11 @@
     #tai .logoTai {
       width:100px;
       height:100px;
+
       display:flex;
       align-items:center;
       justify-content:center;
+
       margin-bottom:20px;
     }
 
@@ -173,9 +219,11 @@
     #tai .vong {
       width:38px;
       height:38px;
+
       border:3px solid rgba(31,78,121,.16);
       border-top-color:#1F4E79;
       border-radius:50%;
+
       animation:quay .8s linear infinite;
     }
 
@@ -185,14 +233,18 @@
 
     #tai p {
       margin-top:14px;
+
       font-size:13px;
       font-weight:500;
+
       color:#7F8C8D;
+
       text-align:center;
       line-height:1.5;
     }
 
     @media (max-width:600px) {
+
       #tai .logoTai {
         width:88px;
         height:88px;
@@ -212,6 +264,8 @@
 </head>
 
 <body>
+
+  <div id="safeTop"></div>
 
   <div id="tai">
     <div class="logoTai">
@@ -239,21 +293,6 @@
       var APP_URL =
         'https://script.google.com/macros/s/AKfycbwT6PZZ1WDmBrAE6g3vfKuQAkbnL7oVuXJfuw2hc-rDLId1L4ONZzfzXduaYDLYZoXI3Q/exec';
 
-      /*
-       * =====================================================
-       * MOBILE BROWSER
-       * =====================================================
-       *
-       * Safari/Chrome điện thoại không cuộn top-level khi người
-       * dùng đang cuộn trong iframe cross-origin. Vì vậy thanh
-       * trình duyệt có thể không thu lại đúng cách.
-       *
-       * Trên điện thoại mở bằng browser thông thường:
-       * chuyển Apps Script thành TOP-LEVEL page.
-       *
-       * Khi mở từ icon Home Screen:
-       * giữ wrapper để vẫn có trải nghiệm app/branding.
-       */
       var laStandalone =
         window.matchMedia('(display-mode: standalone)').matches ||
         window.navigator.standalone === true;
@@ -265,6 +304,13 @@
           navigator.maxTouchPoints > 0
         );
 
+      /*
+       * Trình duyệt điện thoại thông thường:
+       * Apps Script chạy top-level để Safari/Chrome cuộn tự nhiên.
+       *
+       * Add to Home Screen / PWA:
+       * GIỮ wrapper để có logo loading và trải nghiệm app.
+       */
       if (laDienThoai && !laStandalone) {
         window.location.replace(APP_URL);
         return;
@@ -274,108 +320,14 @@
       var root = document.documentElement;
       var khung = document.getElementById('khungApp');
       var tai = document.getElementById('tai');
-      var metaTheme = document.querySelector('meta[name="theme-color"]');
+      var metaTheme =
+        document.querySelector('meta[name="theme-color"]');
 
       var app = document.createElement('iframe');
 
       var daMoApp = false;
       var batDau = Date.now();
       var loadingToiThieu = 500;
-
-      var rafViewport = 0;
-
-
-      /*
-       * =====================================================
-       * IPHONE / ANDROID VIEWPORT
-       * =====================================================
-       *
-       * Bám trực tiếp visualViewport thay vì dựa vào
-       * vh / svh / dvh của WebKit.
-       */
-      function dongBoViewport() {
-
-        if (rafViewport) {
-          cancelAnimationFrame(rafViewport);
-        }
-
-        rafViewport = requestAnimationFrame(function () {
-
-          var vv = window.visualViewport;
-
-          var top = vv ? vv.offsetTop : 0;
-          var left = vv ? vv.offsetLeft : 0;
-          var width = vv ? vv.width : window.innerWidth;
-          var height = vv ? vv.height : window.innerHeight;
-
-          root.style.setProperty(
-            '--vv-top',
-            Math.round(top) + 'px'
-          );
-
-          root.style.setProperty(
-            '--vv-left',
-            Math.round(left) + 'px'
-          );
-
-          root.style.setProperty(
-            '--vv-width',
-            Math.ceil(width) + 'px'
-          );
-
-          root.style.setProperty(
-            '--vv-height',
-            Math.ceil(height) + 'px'
-          );
-
-        });
-      }
-
-
-      dongBoViewport();
-
-      window.addEventListener(
-        'resize',
-        dongBoViewport,
-        { passive:true }
-      );
-
-      window.addEventListener(
-        'orientationchange',
-        function () {
-          dongBoViewport();
-
-          setTimeout(dongBoViewport, 100);
-          setTimeout(dongBoViewport, 300);
-          setTimeout(dongBoViewport, 700);
-        },
-        { passive:true }
-      );
-
-      window.addEventListener(
-        'pageshow',
-        function () {
-          dongBoViewport();
-          setTimeout(dongBoViewport, 100);
-        }
-      );
-
-
-      if (window.visualViewport) {
-
-        window.visualViewport.addEventListener(
-          'resize',
-          dongBoViewport,
-          { passive:true }
-        );
-
-        window.visualViewport.addEventListener(
-          'scroll',
-          dongBoViewport,
-          { passive:true }
-        );
-
-      }
 
 
       function datTrangThaiManHinh(screen) {
@@ -427,8 +379,6 @@
 
         setTimeout(function () {
 
-          dongBoViewport();
-
           app.classList.add('daTai');
 
           requestAnimationFrame(function () {
@@ -463,14 +413,16 @@
 
 
           if (event.data.type === 'HTV_HRM_SCREEN') {
-            datTrangThaiManHinh(event.data.screen);
-            dongBoViewport();
+
+            datTrangThaiManHinh(
+              event.data.screen
+            );
+
             return;
           }
 
 
           if (event.data.type === 'HTV_HRM_READY') {
-            dongBoViewport();
             moApp();
           }
 
@@ -481,7 +433,6 @@
       app.addEventListener(
         'load',
         function () {
-          dongBoViewport();
           setTimeout(moApp, 80);
         },
         { once:true }
