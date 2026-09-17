@@ -16,20 +16,13 @@
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
 
-  /* Trang ngoài: không cố định chiều cao, không cuộn */
+  /* Trang ngoài: không cuộn, nền trùng màu hệ thống */
   html{overflow:hidden;background:#F4F6F9}
   body{background:#F4F6F9}
 
-  /* Khung hệ thống nằm bình thường trong trang, KHÔNG dùng position:fixed
-     vì iOS 26 có lỗi: khung cố định không phủ được phần đáy màn hình */
-  #app{display:block;width:100%;height:100vh;border:none}
-
-  /* Ô vô hình dùng để đo vùng giờ/pin */
-  #doVung{
-    position:absolute;top:0;left:0;width:0;height:0;visibility:hidden;
-    padding-top:env(safe-area-inset-top,0px);
-    padding-bottom:env(safe-area-inset-bottom,0px)
-  }
+  /* Khung hệ thống nằm bình thường trong trang (không dùng position:fixed
+     để tránh lỗi hở đáy trên iOS 26). Chiều cao do đoạn script bên dưới tính. */
+  #app{display:block;width:100%;height:100vh;border:0}
 
   #tai{
     position:fixed;inset:0;display:flex;flex-direction:column;
@@ -54,8 +47,6 @@
   <p>Đang mở Cổng Thông tin Nhân sự...</p>
 </div>
 
-<div id="doVung"></div>
-
 <iframe id="app" allow="clipboard-write; geolocation"></iframe>
 
 <script>
@@ -63,32 +54,66 @@
   var LINK_APP = 'https://script.google.com/macros/s/AKfycbwT6PZZ1WDmBrAE6g3vfKuQAkbnL7oVuXJfuw2hc-rDLId1L4ONZzfzXduaYDLYZoXI3Q/exec';
 
   var khung = document.getElementById('app');
-  var o = document.getElementById('doVung');
+  var laAppIOS = window.navigator.standalone === true;   // iPhone/iPad mở từ màn hình chính
+  var daDat = 0;
 
-  function doVung() {
-    var cs = getComputedStyle(o);
-    return {
-      tren: Math.round(parseFloat(cs.paddingTop) || 0),
-      duoi: Math.round(parseFloat(cs.paddingBottom) || 0)
-    };
+  /** Chiều cao khung cần dùng, đúng cho mọi dòng máy */
+  function chieuCaoCanDung() {
+    var w = window.innerWidth, h = window.innerHeight;
+
+    if (laAppIOS && window.screen) {
+      var ngang = w > h;
+      var a = window.screen.width, b = window.screen.height;
+      var rongMH = ngang ? Math.max(a, b) : Math.min(a, b);
+      var caoMH  = ngang ? Math.min(a, b) : Math.max(a, b);
+
+      // App chiếm trọn bề ngang màn hình -> dùng chiều cao thật của màn hình.
+      // (iPad chia đôi màn hình thì bỏ qua, dùng kích thước cửa sổ.)
+      if (Math.abs(rongMH - w) <= 2) return caoMH;
+    }
+    return h;
   }
 
-  // iPhone báo chiều cao đã trừ vùng giờ/pin, nên cộng bù lại
   function khopChieuCao() {
-    khung.style.height = (window.innerHeight + doVung().tren) + 'px';
+    var h = Math.round(chieuCaoCanDung());
+    if (h > 0 && h !== daDat) {
+      khung.style.height = h + 'px';
+      daDat = h;
+    }
+    // Đưa trang ngoài về đúng vị trí nếu bị đẩy lệch (thường gặp sau khi đóng bàn phím)
+    if (window.scrollY || window.scrollX) window.scrollTo(0, 0);
   }
 
-  khopChieuCao();
+  function khopNhieuLan() {
+    khopChieuCao();
+    setTimeout(khopChieuCao, 150);
+    setTimeout(khopChieuCao, 500);
+    setTimeout(khopChieuCao, 1200);
+  }
+
+  // Căn lại khi: xoay máy, đổi kích thước, quay lại app, đóng bàn phím
   window.addEventListener('resize', khopChieuCao);
-  window.addEventListener('orientationchange', function () {
-    setTimeout(khopChieuCao, 300);
+  window.addEventListener('orientationchange', khopNhieuLan);
+  window.addEventListener('pageshow', khopNhieuLan);
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden) khopNhieuLan();
+  });
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', function () {
+      setTimeout(khopChieuCao, 120);
+    });
+  }
+  window.addEventListener('scroll', function () {
+    if (window.scrollY || window.scrollX) setTimeout(khopChieuCao, 120);
   });
 
-  var v = doVung();
+  khopNhieuLan();
+
   khung.onload = function () {
     document.getElementById('tai').style.display = 'none';
+    khopNhieuLan();
   };
-  khung.src = LINK_APP + '?tren=' + v.tren + '&duoi=' + v.duoi;
+  khung.src = LINK_APP;
 })();
 </script>
 
