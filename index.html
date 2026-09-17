@@ -10,12 +10,7 @@
 
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-
-  <meta
-    name="apple-mobile-web-app-status-bar-style"
-    content="black-translucent"
-  >
-
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="HTV HR">
   <meta name="theme-color" content="#F6EFE3">
 
@@ -42,12 +37,11 @@
 
     html,
     body {
+      position: fixed;
+      inset: 0;
+
       width: 100%;
       height: 100%;
-      min-height: 100%;
-
-      margin: 0;
-      padding: 0;
 
       overflow: hidden;
       overscroll-behavior: none;
@@ -77,45 +71,46 @@
         BlinkMacSystemFont,
         Arial,
         sans-serif;
-
-      color-scheme: light;
     }
 
     body {
-      position: fixed;
-      inset: 0;
-
-      width: 100vw;
-
       height: 100vh;
       height: 100svh;
       height: 100dvh;
-
-      min-height: 100vh;
-      min-height: 100svh;
-      min-height: 100dvh;
-
-      -webkit-text-size-adjust: 100%;
     }
 
 
-    /* =====================================================
-       APP IFRAME
-       ===================================================== */
+    /* ==========================================
+       KHUNG CHỨA APP
+       ========================================== */
 
-    #app {
+    #khungApp {
       position: fixed;
       inset: 0;
-
-      display: block;
 
       width: 100%;
       height: 100vh;
       height: 100svh;
       height: 100dvh;
 
-      min-width: 100%;
-      min-height: 100%;
+      overflow: hidden;
+
+      background: #F4F6F9;
+    }
+
+
+    /* ==========================================
+       IFRAME
+       ========================================== */
+
+    #app {
+      position: absolute;
+      inset: 0;
+
+      display: block;
+
+      width: 100%;
+      height: 100%;
 
       border: 0;
       outline: 0;
@@ -125,8 +120,6 @@
       opacity: 0;
 
       transition: opacity .18s ease;
-
-      z-index: 1;
     }
 
     #app.daTai {
@@ -134,15 +127,15 @@
     }
 
 
-    /* =====================================================
-       MÀN HÌNH CHỜ
-       ===================================================== */
+    /* ==========================================
+       LOADING
+       ========================================== */
 
     #tai {
       position: fixed;
       inset: 0;
 
-      z-index: 9999;
+      z-index: 999999;
 
       width: 100%;
       height: 100vh;
@@ -165,8 +158,6 @@
 
       padding-left:
         max(20px, env(safe-area-inset-left, 0px));
-
-      overflow: hidden;
 
       background:
         radial-gradient(
@@ -201,13 +192,13 @@
     }
 
 
-    /* =====================================================
-       LOGO
-       ===================================================== */
+    /* ==========================================
+       LOGO LOADING
+       ========================================== */
 
     #tai .logoTai {
-      width: 104px;
-      height: 104px;
+      width: 100px;
+      height: 100px;
 
       display: flex;
       align-items: center;
@@ -226,9 +217,9 @@
     }
 
 
-    /* =====================================================
-       LOADING SPINNER
-       ===================================================== */
+    /* ==========================================
+       SPINNER
+       ========================================== */
 
     #tai .vong {
       width: 38px;
@@ -249,10 +240,6 @@
     }
 
 
-    /* =====================================================
-       CHỮ LOADING
-       ===================================================== */
-
     #tai p {
       margin-top: 15px;
 
@@ -266,16 +253,16 @@
     }
 
 
-    /* =====================================================
+    /* ==========================================
        MOBILE
-       ===================================================== */
+       ========================================== */
 
-    @media (max-width: 600px) {
+    @media (max-width:600px) {
 
       #tai .logoTai {
-        width: 90px;
-        height: 90px;
-        margin-bottom: 19px;
+        width: 88px;
+        height: 88px;
+        margin-bottom: 18px;
       }
 
       #tai .vong {
@@ -288,44 +275,13 @@
         margin-top: 13px;
       }
     }
-
-
-    /* =====================================================
-       IPHONE / ANDROID MÀN NHỎ
-       ===================================================== */
-
-    @media (max-width: 390px) {
-
-      #tai .logoTai {
-        width: 82px;
-        height: 82px;
-      }
-
-      #tai p {
-        font-size: 12px;
-      }
-    }
-
-
-    /* =====================================================
-       PWA / ADD TO HOME SCREEN
-       ===================================================== */
-
-    @media (display-mode: standalone) {
-
-      body,
-      #app,
-      #tai {
-        height: 100dvh;
-      }
-    }
   </style>
 </head>
 
 
 <body>
 
-  <!-- ================= MÀN HÌNH CHỜ ================= -->
+  <!-- MÀN LOADING -->
   <div id="tai">
 
     <div class="logoTai">
@@ -338,87 +294,217 @@
 
     <div class="vong"></div>
 
-    <p>
-      Đang mở Cổng Thông tin Nhân sự...
-    </p>
+    <p>Đang mở Cổng Thông tin Nhân sự...</p>
 
   </div>
 
 
-  <!-- ================= ỨNG DỤNG HRM ================= -->
-<iframe
-  id="app"
-  src="https://script.google.com/macros/s/AKfycbwT6PZZ1WDmBrAE6g3vfKuQAkbnL7oVuXJfuw2hc-rDLId1L4ONZzfzXduaYDLYZoXI3Q/exec"
-  allow="clipboard-write; geolocation"
-  title="Cổng Thông tin Nhân sự HTV"
-></iframe>
+  <!-- IFRAME SẼ ĐƯỢC JAVASCRIPT TẠO MỚI -->
+  <div id="khungApp"></div>
 
 
-<script>
-  (function () {
+  <script>
+    (function () {
 
-    var app = document.getElementById('app');
-    var tai = document.getElementById('tai');
+      var APP_URL =
+        'https://script.google.com/macros/s/AKfycbwT6PZZ1WDmBrAE6g3vfKuQAkbnL7oVuXJfuw2hc-rDLId1L4ONZzfzXduaYDLYZoXI3Q/exec';
 
-    var daMoApp = false;
+      var khung = document.getElementById('khungApp');
+      var tai = document.getElementById('tai');
+
+      var app = null;
+      var dangNap = false;
 
 
-    function hienApp() {
+      /* ==========================================
+         HIỆN LOADING
+         ========================================== */
 
-      if (daMoApp) return;
+      function hienLoading() {
 
-      daMoApp = true;
+        tai.classList.remove('anTai');
 
-      // Iframe đã reset xong giao diện thì mới cho hiện
-      app.classList.add('daTai');
+      }
 
-      requestAnimationFrame(function () {
+
+      /* ==========================================
+         ẨN LOADING
+         ========================================== */
+
+      function anLoading() {
 
         requestAnimationFrame(function () {
 
-          setTimeout(function () {
-            tai.classList.add('anTai');
-          }, 100);
+          requestAnimationFrame(function () {
+
+            setTimeout(function () {
+
+              tai.classList.add('anTai');
+
+            }, 150);
+
+          });
 
         });
 
-      });
-    }
-
-
-    /*
-     * Không dùng iframe.onload để ẩn loading nữa.
-     * onload có thể xảy ra trước khi Apps Script reset DOM cũ.
-     *
-     * Chỉ khi Apps Script gửi HTV_HRM_READY
-     * thì mới mở giao diện.
-     */
-    window.addEventListener('message', function (event) {
-
-      if (event.source !== app.contentWindow) {
-        return;
       }
 
-      if (
-        event.data &&
-        event.data.type === 'HTV_HRM_READY'
-      ) {
-        hienApp();
+
+      /* ==========================================
+         TẠO APP HOÀN TOÀN MỚI
+         ========================================== */
+
+      function napAppMoi() {
+
+        if (dangNap) return;
+
+        dangNap = true;
+
+        hienLoading();
+
+
+        /*
+         * XÓA HẲN iframe cũ.
+         *
+         * Không tái sử dụng iframe cũ vì Safari,
+         * Chrome, PWA và WebView có thể phục hồi
+         * nguyên trạng thái DOM/modal trước đó.
+         */
+        if (app && app.parentNode) {
+
+          try {
+            app.src = 'about:blank';
+          } catch (e) {}
+
+          app.parentNode.removeChild(app);
+
+          app = null;
+        }
+
+
+        /*
+         * Xóa bất kỳ iframe còn sót nào trong container.
+         */
+        while (khung.firstChild) {
+          khung.removeChild(khung.firstChild);
+        }
+
+
+        /*
+         * TẠO MỘT iframe HOÀN TOÀN MỚI.
+         */
+        app = document.createElement('iframe');
+
+        app.id = 'app';
+
+        app.setAttribute(
+          'allow',
+          'clipboard-write; geolocation'
+        );
+
+        app.setAttribute(
+          'title',
+          'Cổng Thông tin Nhân sự HTV'
+        );
+
+
+        /*
+         * Chỉ sau khi iframe MỚI tải xong
+         * mới cho người dùng nhìn thấy.
+         */
+        app.addEventListener(
+          'load',
+          function () {
+
+            app.classList.add('daTai');
+
+            anLoading();
+
+            dangNap = false;
+
+          },
+          { once: true }
+        );
+
+
+        khung.appendChild(app);
+
+
+        /*
+         * Cache-busting.
+         *
+         * Mỗi lần mở hệ thống là một URL mới,
+         * tránh browser/PWA phục hồi iframe cũ.
+         */
+        app.src =
+          APP_URL
+          + '?htv_fresh='
+          + Date.now();
+
       }
 
-    });
+
+      /* ==========================================
+         LẦN MỞ ĐẦU TIÊN
+         ========================================== */
+
+      napAppMoi();
 
 
-    /*
-     * Fallback phòng trường hợp postMessage không tới được
-     * trên một WebView đặc biệt.
-     */
-    setTimeout(function () {
-      hienApp();
-    }, 12000);
+      /* ==========================================
+         FIX BACK-FORWARD CACHE
+         SAFARI / IPHONE / ANDROID / DESKTOP
+         ========================================== */
 
-  })();
-</script>
+      window.addEventListener(
+        'pageshow',
+        function (event) {
+
+          /*
+           * Nếu browser phục hồi cả trang GitHub
+           * từ bộ nhớ thì iframe bên trong cũng có
+           * thể còn nguyên modal cũ.
+           *
+           * Khi đó bắt buộc tạo iframe mới.
+           */
+          if (event.persisted) {
+
+            dangNap = false;
+
+            setTimeout(function () {
+
+              napAppMoi();
+
+            }, 0);
+
+          }
+
+        }
+      );
+
+
+      /* ==========================================
+         KHI APP QUAY LẠI TỪ BACKGROUND
+         ========================================== */
+
+      document.addEventListener(
+        'visibilitychange',
+        function () {
+
+          /*
+           * Không reload mỗi lần chuyển app.
+           *
+           * Chỉ để browser giữ nguyên phiên đang dùng.
+           */
+          if (document.visibilityState === 'visible') {
+            // Không làm gì.
+          }
+
+        }
+      );
+
+    })();
+  </script>
 
 </body>
 </html>
