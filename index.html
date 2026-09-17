@@ -1,444 +1,48 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="utf-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width,initial-scale=1,viewport-fit=cover"
-  >
-
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="HTV HR">
-  <meta name="theme-color" content="#F6EFE3">
-
-  <link rel="preconnect" href="https://script.google.com">
-  <link rel="preconnect" href="https://script.googleusercontent.com">
-  <link rel="preconnect" href="https://lh3.googleusercontent.com">
-
-  <link rel="dns-prefetch" href="//script.google.com">
-  <link rel="dns-prefetch" href="//script.googleusercontent.com">
-  <link rel="dns-prefetch" href="//lh3.googleusercontent.com">
-
-  <title>HTV HR</title>
-
-  <link
-    rel="apple-touch-icon"
-    sizes="180x180"
-    href="https://lh3.googleusercontent.com/d/1XXbdoGTqfp6bRR_baYsr0GvQ8uRei4d_"
-  >
-
-  <link
-    rel="icon"
-    type="image/png"
-    href="https://lh3.googleusercontent.com/d/1NmEtOM0IPmywMgJoaFKmSWCzNIWRTtJF"
-  >
-
-  <style>
-    * {
-      margin:0;
-      padding:0;
-      box-sizing:border-box;
-    }
-
-    :root {
-      --shell-bg:#F6EFE3;
-    }
-
-    html[data-screen="main"] {
-      --shell-bg:#F4F6F9;
-    }
-
-    html,
-    body {
-      width:100%;
-      height:100%;
-      margin:0;
-      padding:0;
-      overflow:hidden;
-
-      background:var(--shell-bg);
-
-      font-family:
-        'Segoe UI',
-        system-ui,
-        -apple-system,
-        BlinkMacSystemFont,
-        Arial,
-        sans-serif;
-
-      -webkit-text-size-adjust:100%;
-    }
-
-    /*
-     * QUAN TRỌNG:
-     * Không dùng visualViewport, 100dvh, 100svh.
-     *
-     * bottom:0 khiến iframe kéo THẬT SỰ tới đáy layout viewport,
-     * bao gồm vùng Home Indicator của iPhone.
-     */
-    #khungApp {
-      position:fixed;
-
-      /*
-       * TOP giữ nguyên như trước.
-       * Chỉ xử lý phần đáy iPhone.
-       */
-      top:0;
-      right:0;
-      left:0;
-
-      /*
-       * Kéo iframe xuống dưới mép viewport đúng bằng safe-area đáy.
-       * Nhờ vậy nội dung không dừng trước vùng Home Indicator.
-       */
-      bottom:calc(0px - env(safe-area-inset-bottom, 0px));
-
-      z-index:1;
-      overflow:hidden;
-
-      background:#F4F6F9;
-    }
-
-    #app {
-      position:absolute;
-      inset:0;
-
-      display:block;
-
-      width:100%;
-      height:100%;
-
-      border:0;
-      outline:0;
-
-      background:#F4F6F9;
-
-      opacity:0;
-      transition:opacity .16s ease;
-    }
-
-    #app.daTai {
-      opacity:1;
-    }
-
-    /*
-     * Loading phải phủ TOÀN BỘ màn hình PWA,
-     * không dừng trước safe-area đáy.
-     */
-    #tai {
-      position:fixed;
-
-      top:0;
-      right:0;
-      left:0;
-      bottom:calc(0px - env(safe-area-inset-bottom, 0px));
-
-      z-index:999999;
-
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-
-      padding-top:
-        max(20px, env(safe-area-inset-top, 0px));
-
-      padding-right:
-        max(20px, env(safe-area-inset-right, 0px));
-
-      padding-bottom:20px;
-
-      padding-left:
-        max(20px, env(safe-area-inset-left, 0px));
-
-      overflow:hidden;
-
-      background:
-        radial-gradient(
-          ellipse 60% 45% at 15% 10%,
-          rgba(212,165,90,.22),
-          transparent 62%
-        ),
-        radial-gradient(
-          ellipse 65% 55% at 88% 92%,
-          rgba(122,46,62,.14),
-          transparent 65%
-        ),
-        linear-gradient(
-          150deg,
-          #FEFCF8 0%,
-          #F6EFE3 55%,
-          #EDE0CC 100%
-        );
-
-      opacity:1;
-      visibility:visible;
-
-      transition:
-        opacity .18s ease,
-        visibility .18s ease;
-    }
-
-    #tai.anTai {
-      opacity:0;
-      visibility:hidden;
-      pointer-events:none;
-    }
-
-    #tai .logoTai {
-      width:100px;
-      height:100px;
-
-      display:flex;
-      align-items:center;
-      justify-content:center;
-
-      margin-bottom:20px;
-    }
-
-    #tai .logoTai img {
-      display:block;
-      width:100%;
-      height:100%;
-      object-fit:contain;
-    }
-
-    #tai .vong {
-      width:38px;
-      height:38px;
-
-      border:3px solid rgba(31,78,121,.16);
-      border-top-color:#1F4E79;
-      border-radius:50%;
-
-      animation:quay .8s linear infinite;
-    }
-
-    @keyframes quay {
-      to { transform:rotate(360deg); }
-    }
-
-    #tai p {
-      margin-top:14px;
-
-      font-size:13px;
-      font-weight:500;
-
-      color:#7F8C8D;
-
-      text-align:center;
-      line-height:1.5;
-    }
-
-    @media (max-width:600px) {
-
-      #tai .logoTai {
-        width:88px;
-        height:88px;
-        margin-bottom:18px;
-      }
-
-      #tai .vong {
-        width:34px;
-        height:34px;
-      }
-
-      #tai p {
-        font-size:12.5px;
-      }
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="HTV HR">
+<meta name="theme-color" content="#1F4E79">
+<title>HTV HR</title>
+<link rel="apple-touch-icon" sizes="180x180"
+      href="https://lh3.googleusercontent.com/d/1XXbdoGTqfp6bRR_baYsr0GvQ8uRei4d_">
+<link rel="icon" type="image/png"
+      href="https://lh3.googleusercontent.com/d/1NmEtOM0IPmywMgJoaFKmSWCzNIWRTtJF">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;overflow:hidden;background:#F4F6F9}
+  iframe{width:100%;height:100%;border:none;display:block}
+  #tai{
+    position:fixed;inset:0;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+    background:linear-gradient(150deg,#FEFCF8,#F6EFE3,#EDE0CC);
+    font-family:'Segoe UI',system-ui,Arial,sans-serif;z-index:10
+  }
+  #tai img{width:96px;height:96px;object-fit:contain;margin-bottom:18px}
+  #tai .vong{
+    width:38px;height:38px;border:3px solid rgba(31,78,121,.2);
+    border-top-color:#1F4E79;border-radius:50%;animation:quay .9s linear infinite
+  }
+  @keyframes quay{to{transform:rotate(360deg)}}
+  #tai p{margin-top:14px;font-size:13px;color:#7F8C8D}
+</style>
 </head>
-
 <body>
 
-  <div id="tai">
-    <div class="logoTai">
-      <img
-        src="https://lh3.googleusercontent.com/d/1IU0gpNl0tcK-9drj2r2FkL2QfykBtjZd"
-        alt="HTV EDU Group"
-        width="100"
-        height="100"
-        decoding="async"
-        fetchpriority="high"
-        referrerpolicy="no-referrer"
-      >
-    </div>
+<div id="tai">
+  <img src="https://lh3.googleusercontent.com/d/1IU0gpNl0tcK-9drj2r2FkL2QfykBtjZd" alt="HTV">
+  <div class="vong"></div>
+  <p>Đang mở Cổng Thông tin Nhân sự...</p>
+</div>
 
-    <div class="vong"></div>
-
-    <p>Đang mở Cổng Thông tin Nhân sự...</p>
-  </div>
-
-  <div id="khungApp"></div>
-
-  <script>
-    (function () {
-
-      var APP_URL =
-        'https://script.google.com/macros/s/AKfycbwT6PZZ1WDmBrAE6g3vfKuQAkbnL7oVuXJfuw2hc-rDLId1L4ONZzfzXduaYDLYZoXI3Q/exec';
-
-      var laStandalone =
-        window.matchMedia('(display-mode: standalone)').matches ||
-        window.navigator.standalone === true;
-
-      var laDienThoai =
-        window.matchMedia('(max-width: 820px)').matches &&
-        (
-          'ontouchstart' in window ||
-          navigator.maxTouchPoints > 0
-        );
-
-      /*
-       * Trình duyệt điện thoại thông thường:
-       * Apps Script chạy top-level để Safari/Chrome cuộn tự nhiên.
-       *
-       * Add to Home Screen / PWA:
-       * GIỮ wrapper để có logo loading và trải nghiệm app.
-       */
-      if (laDienThoai && !laStandalone) {
-        window.location.replace(APP_URL);
-        return;
-      }
-
-
-      var root = document.documentElement;
-      var khung = document.getElementById('khungApp');
-      var tai = document.getElementById('tai');
-      var metaTheme =
-        document.querySelector('meta[name="theme-color"]');
-
-      var app = document.createElement('iframe');
-
-      var daMoApp = false;
-      var batDau = Date.now();
-      var loadingToiThieu = 500;
-
-
-      function datTrangThaiManHinh(screen) {
-
-        var laMain = screen === 'main';
-
-        root.setAttribute(
-          'data-screen',
-          laMain ? 'main' : 'login'
-        );
-
-        if (metaTheme) {
-          metaTheme.setAttribute(
-            'content',
-            laMain ? '#6B2434' : '#F6EFE3'
-          );
-        }
-      }
-
-
-      datTrangThaiManHinh('login');
-
-
-      app.id = 'app';
-      app.title = 'Cổng Thông tin Nhân sự HTV';
-
-      app.setAttribute(
-        'allow',
-        'clipboard-write; geolocation'
-      );
-
-      app.setAttribute(
-        'loading',
-        'eager'
-      );
-
-
-      function moApp() {
-
-        if (daMoApp) return;
-        daMoApp = true;
-
-        var daCho = Date.now() - batDau;
-
-        var conCho = Math.max(
-          0,
-          loadingToiThieu - daCho
-        );
-
-        setTimeout(function () {
-
-          app.classList.add('daTai');
-
-          requestAnimationFrame(function () {
-
-            requestAnimationFrame(function () {
-
-              setTimeout(function () {
-                tai.classList.add('anTai');
-              }, 80);
-
-            });
-
-          });
-
-        }, conCho);
-      }
-
-
-      window.addEventListener(
-        'message',
-        function (event) {
-
-          if (!event.data) return;
-
-          var origin = String(event.origin || '');
-
-          var laGoogle =
-            origin === 'https://script.google.com' ||
-            /^https:\/\/[^/]*googleusercontent\.com$/i.test(origin);
-
-          if (!laGoogle) return;
-
-
-          if (event.data.type === 'HTV_HRM_SCREEN') {
-
-            datTrangThaiManHinh(
-              event.data.screen
-            );
-
-            return;
-          }
-
-
-          if (event.data.type === 'HTV_HRM_READY') {
-            moApp();
-          }
-
-        }
-      );
-
-
-      app.addEventListener(
-        'load',
-        function () {
-          setTimeout(moApp, 80);
-        },
-        { once:true }
-      );
-
-
-      app.src = APP_URL;
-
-      khung.appendChild(app);
-
-
-      setTimeout(
-        moApp,
-        6000
-      );
-
-    })();
-  </script>
+<iframe id="app" src="DAN_LINK_APP_VAO_DAY"
+        allow="clipboard-write; geolocation"
+        onload="document.getElementById('tai').style.display='none'"></iframe>
 
 </body>
 </html>
