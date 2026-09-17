@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="HTV HR">
-<meta name="theme-color" content="#1F4E79">
+<meta name="theme-color" content="#4A1520">
 <title>HTV HR</title>
 <link rel="apple-touch-icon" sizes="180x180"
       href="https://lh3.googleusercontent.com/d/1XXbdoGTqfp6bRR_baYsr0GvQ8uRei4d_">
@@ -15,8 +15,23 @@
       href="https://lh3.googleusercontent.com/d/1NmEtOM0IPmywMgJoaFKmSWCzNIWRTtJF">
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
-  html,body{height:100%;overflow:hidden;background:#F4F6F9}
-  iframe{width:100%;height:100%;border:none;display:block}
+  html,body{width:100%;height:100%;overflow:hidden;background:#F4F6F9}
+
+  /* Vùng thanh trạng thái iPhone: cùng màu thanh tiêu đề */
+  #vungTrangThai{
+    position:fixed;top:0;left:0;right:0;z-index:5;
+    height:env(safe-area-inset-top,0px);
+    background:linear-gradient(135deg,#4A1520 0%,#6B2434 55%,#7A2E3E 100%)
+  }
+
+  /* Khung hệ thống: ngay dưới thanh trạng thái, kéo sát đáy màn hình */
+  #khungApp{
+    position:fixed;left:0;right:0;
+    top:env(safe-area-inset-top,0px);
+    height:calc(100vh - env(safe-area-inset-top,0px))
+  }
+  #khungApp iframe{width:100%;height:100%;border:none;display:block}
+
   #tai{
     position:fixed;inset:0;display:flex;flex-direction:column;
     align-items:center;justify-content:center;
@@ -40,9 +55,14 @@
   <p>Đang mở Cổng Thông tin Nhân sự...</p>
 </div>
 
-<iframe id="app" src="https://script.google.com/macros/s/AKfycbwT6PZZ1WDmBrAE6g3vfKuQAkbnL7oVuXJfuw2hc-rDLId1L4ONZzfzXduaYDLYZoXI3Q/exec"
-        allow="clipboard-write; geolocation"
-        onload="document.getElementById('tai').style.display='none'"></iframe>
+<div id="vungTrangThai"></div>
+
+<div id="khungApp">
+  <iframe id="app"
+          src="https://script.google.com/macros/s/AKfycbwT6PZZ1WDmBrAE6g3vfKuQAkbnL7oVuXJfuw2hc-rDLId1L4ONZzfzXduaYDLYZoXI3Q/exec"
+          allow="clipboard-write; geolocation"
+          onload="document.getElementById('tai').style.display='none'"></iframe>
+</div>
 
 </body>
 </html>
