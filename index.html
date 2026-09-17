@@ -99,8 +99,14 @@
       position: fixed;
       top: 0;
       right: 0;
-      bottom: 0;
       left: 0;
+
+      /*
+       * iPhone/PWA:
+       * kéo lớp hiển thị xuống dưới safe-area thay vì dừng ở mép
+       * visual viewport. Desktop/Android không có inset thì = 0.
+       */
+      bottom: calc(0px - env(safe-area-inset-bottom, 0px));
     }
 
     #khungApp {
@@ -139,7 +145,7 @@
       border: 0;
       outline: 0;
 
-      background: transparent;
+      background: #F4F6F9;
 
       opacity: 0;
       transition: opacity .16s ease;
@@ -164,7 +170,7 @@
         max(20px, env(safe-area-inset-right, 0px));
 
       padding-bottom:
-        max(20px, env(safe-area-inset-bottom, 0px));
+        max(20px, calc(20px + env(safe-area-inset-bottom, 0px)));
 
       padding-left:
         max(20px, env(safe-area-inset-left, 0px));
