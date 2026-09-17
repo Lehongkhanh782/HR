@@ -44,11 +44,23 @@
       box-sizing: border-box;
     }
 
+    :root {
+      --shell-bg: #F6EFE3;
+      --shell-top: #F6EFE3;
+      --shell-bottom: #EDE0CC;
+    }
+
+    html[data-screen="main"] {
+      --shell-bg: #F4F6F9;
+      --shell-top: #6B2434;
+      --shell-bottom: #F4F6F9;
+    }
+
     html {
       width: 100%;
       height: 100%;
       min-height: 100%;
-      background: #EDE0CC;
+      background: var(--shell-bg);
       overflow: hidden;
     }
 
@@ -69,23 +81,7 @@
         Arial,
         sans-serif;
 
-      background:
-        radial-gradient(
-          ellipse 60% 45% at 15% 10%,
-          rgba(212,165,90,.22),
-          transparent 62%
-        ),
-        radial-gradient(
-          ellipse 65% 55% at 88% 92%,
-          rgba(122,46,62,.14),
-          transparent 65%
-        ),
-        linear-gradient(
-          150deg,
-          #FEFCF8 0%,
-          #F6EFE3 55%,
-          #EDE0CC 100%
-        );
+      background: var(--shell-bg);
 
       -webkit-text-size-adjust: 100%;
     }
@@ -97,39 +93,14 @@
     #khungApp,
     #tai {
       position: fixed;
-      top: 0;
-      right: 0;
-      left: 0;
-
-      /*
-       * iPhone/PWA:
-       * kéo lớp hiển thị xuống dưới safe-area thay vì dừng ở mép
-       * visual viewport. Desktop/Android không có inset thì = 0.
-       */
-      bottom: calc(0px - env(safe-area-inset-bottom, 0px));
+      inset: 0;
     }
 
     #khungApp {
       overflow: hidden;
       z-index: 1;
 
-      background:
-        radial-gradient(
-          ellipse 60% 45% at 15% 10%,
-          rgba(212,165,90,.22),
-          transparent 62%
-        ),
-        radial-gradient(
-          ellipse 65% 55% at 88% 92%,
-          rgba(122,46,62,.14),
-          transparent 65%
-        ),
-        linear-gradient(
-          150deg,
-          #FEFCF8 0%,
-          #F6EFE3 55%,
-          #EDE0CC 100%
-        );
+      background: var(--shell-bg);
     }
 
     #app {
@@ -254,6 +225,31 @@
       line-height: 1.5;
     }
 
+    /*
+     * Hai lớp này chỉ là nền dự phòng phía SAU iframe.
+     * Không phủ lên nội dung vì z-index thấp hơn #khungApp.
+     */
+    #nenSafeTren,
+    #nenSafeDuoi {
+      position: fixed;
+      left: 0;
+      right: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    #nenSafeTren {
+      top: 0;
+      height: max(env(safe-area-inset-top, 0px), 1px);
+      background: var(--shell-top);
+    }
+
+    #nenSafeDuoi {
+      bottom: 0;
+      height: max(env(safe-area-inset-bottom, 0px), 1px);
+      background: var(--shell-bottom);
+    }
+
     @media (max-width: 600px) {
       #tai .logoTai {
         width: 88px;
@@ -274,6 +270,9 @@
 </head>
 
 <body>
+
+  <div id="nenSafeTren"></div>
+  <div id="nenSafeDuoi"></div>
 
   <div id="tai">
     <div class="logoTai">
@@ -303,8 +302,31 @@
 
       var khung = document.getElementById('khungApp');
       var tai = document.getElementById('tai');
+      var metaTheme = document.querySelector('meta[name="theme-color"]');
 
       var app = document.createElement('iframe');
+
+      function datTrangThaiManHinh(screen) {
+        var laMain = screen === 'main';
+
+        document.documentElement.setAttribute(
+          'data-screen',
+          laMain ? 'main' : 'login'
+        );
+
+        /*
+         * Safari dùng theme-color cho một phần UI trình duyệt.
+         * Main ưu tiên nền xám để vùng dưới không còn thành dải be.
+         */
+        if (metaTheme) {
+          metaTheme.setAttribute(
+            'content',
+            laMain ? '#F4F6F9' : '#F6EFE3'
+          );
+        }
+      }
+
+      datTrangThaiManHinh('login');
 
       var daMoApp = false;
 
@@ -371,10 +393,7 @@
         'message',
         function (event) {
 
-          if (
-            !event.data ||
-            event.data.type !== 'HTV_HRM_READY'
-          ) {
+          if (!event.data) {
             return;
           }
 
@@ -388,7 +407,14 @@
             return;
           }
 
-          moApp();
+          if (event.data.type === 'HTV_HRM_SCREEN') {
+            datTrangThaiManHinh(event.data.screen);
+            return;
+          }
+
+          if (event.data.type === 'HTV_HRM_READY') {
+            moApp();
+          }
         }
       );
 
