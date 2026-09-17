@@ -2,6 +2,7 @@
 <html lang="vi">
 <head>
   <meta charset="utf-8">
+
   <meta
     name="viewport"
     content="width=device-width,initial-scale=1,viewport-fit=cover"
@@ -13,9 +14,14 @@
   <meta name="apple-mobile-web-app-title" content="HTV HR">
   <meta name="theme-color" content="#EDE0CC">
 
+  <!-- Mở kết nối tới Google sớm, đặc biệt có lợi trên 4G/5G -->
   <link rel="preconnect" href="https://script.google.com">
   <link rel="preconnect" href="https://script.googleusercontent.com">
   <link rel="preconnect" href="https://lh3.googleusercontent.com">
+
+  <link rel="dns-prefetch" href="//script.google.com">
+  <link rel="dns-prefetch" href="//script.googleusercontent.com">
+  <link rel="dns-prefetch" href="//lh3.googleusercontent.com">
 
   <title>HTV HR</title>
 
@@ -49,6 +55,7 @@
       width: 100%;
       height: 100%;
       margin: 0;
+
       overflow: hidden;
       overscroll-behavior: none;
 
@@ -82,17 +89,19 @@
     }
 
     /*
-     * QUAN TRỌNG:
-     * Không đặt height:100vh / 100svh / 100dvh ở đây.
-     * inset:0 sẽ tự phủ kín viewport thật, kể cả safe-area iPhone.
+     * Không ép 100dvh trên lớp fixed.
+     * inset:0 phủ đúng viewport thực + safe-area iPhone.
      */
-    #khungApp {
+    #khungApp,
+    #tai {
       position: fixed;
       top: 0;
       right: 0;
       bottom: 0;
       left: 0;
+    }
 
+    #khungApp {
       overflow: hidden;
 
       background:
@@ -116,10 +125,7 @@
 
     #app {
       position: absolute;
-      top: 0;
-      right: 0;
-      bottom: 0;
-      left: 0;
+      inset: 0;
 
       display: block;
 
@@ -132,8 +138,7 @@
       background: transparent;
 
       opacity: 0;
-
-      transition: opacity .18s ease;
+      transition: opacity .16s ease;
     }
 
     #app.daTai {
@@ -141,12 +146,6 @@
     }
 
     #tai {
-      position: fixed;
-      top: 0;
-      right: 0;
-      bottom: 0;
-      left: 0;
-
       z-index: 999999;
 
       display: flex;
@@ -190,8 +189,8 @@
       visibility: visible;
 
       transition:
-        opacity .22s ease,
-        visibility .22s ease;
+        opacity .18s ease,
+        visibility .18s ease;
     }
 
     #tai.anTai {
@@ -213,10 +212,8 @@
 
     #tai .logoTai img {
       display: block;
-
       width: 100%;
       height: 100%;
-
       object-fit: contain;
     }
 
@@ -226,16 +223,13 @@
 
       border: 3px solid rgba(31,78,121,.16);
       border-top-color: #1F4E79;
-
       border-radius: 50%;
 
       animation: quay .8s linear infinite;
     }
 
     @keyframes quay {
-      to {
-        transform: rotate(360deg);
-      }
+      to { transform: rotate(360deg); }
     }
 
     #tai p {
@@ -250,10 +244,7 @@
       line-height: 1.5;
     }
 
-    /*
-     * Lớp bảo vệ safe-area đáy cho iPhone.
-     * Nền đồng nhất với màn đăng nhập.
-     */
+    /* Bảo vệ vùng home indicator trên iPhone */
     body::after {
       content: '';
 
@@ -267,12 +258,10 @@
       background: #EDE0CC;
 
       pointer-events: none;
-
       z-index: 0;
     }
 
     @media (max-width: 600px) {
-
       #tai .logoTai {
         width: 88px;
         height: 88px;
@@ -294,11 +283,14 @@
 <body>
 
   <div id="tai">
-
     <div class="logoTai">
       <img
         src="https://lh3.googleusercontent.com/d/1IU0gpNl0tcK-9drj2r2FkL2QfykBtjZd"
         alt="HTV EDU Group"
+        width="100"
+        height="100"
+        decoding="async"
+        fetchpriority="high"
         referrerpolicy="no-referrer"
       >
     </div>
@@ -306,7 +298,6 @@
     <div class="vong"></div>
 
     <p>Đang mở Cổng Thông tin Nhân sự...</p>
-
   </div>
 
   <div id="khungApp"></div>
@@ -322,39 +313,40 @@
 
       var app = document.createElement('iframe');
 
-      var daSanSang = false;
+      var daMoApp = false;
 
-      // Giữ màn logo/loading tối thiểu 750ms để tránh cảm giác nháy.
-      var BAT_DAU_LOADING = Date.now();
-      var THOI_GIAN_LOADING_TOI_THIEU = 750;
+      // Đủ để logo không nháy nhưng không tạo cảm giác chờ.
+      var BAT_DAU = Date.now();
+      var LOADING_TOI_THIEU = 500;
 
 
       app.id = 'app';
-
-      app.title =
-        'Cổng Thông tin Nhân sự HTV';
+      app.title = 'Cổng Thông tin Nhân sự HTV';
 
       app.setAttribute(
         'allow',
         'clipboard-write; geolocation'
       );
 
+      app.setAttribute(
+        'loading',
+        'eager'
+      );
+
 
       function moApp() {
 
-        if (daSanSang) return;
+        if (daMoApp) return;
+        daMoApp = true;
 
-        daSanSang = true;
-
-        var daCho = Date.now() - BAT_DAU_LOADING;
-        var conPhaiCho = Math.max(
+        var daCho = Date.now() - BAT_DAU;
+        var conCho = Math.max(
           0,
-          THOI_GIAN_LOADING_TOI_THIEU - daCho
+          LOADING_TOI_THIEU - daCho
         );
 
         setTimeout(function () {
 
-          // Cho iframe hiện trước rồi mới fade loading ra.
           app.classList.add('daTai');
 
           requestAnimationFrame(function () {
@@ -362,58 +354,69 @@
             requestAnimationFrame(function () {
 
               setTimeout(function () {
-
                 tai.classList.add('anTai');
-
-              }, 120);
+              }, 80);
 
             });
 
           });
 
-        }, conPhaiCho);
-
+        }, conCho);
       }
 
 
+      /*
+       * Tín hiệu chính.
+       *
+       * Apps Script có thể có thêm iframe trung gian của Google,
+       * vì vậy KHÔNG khóa event.source === app.contentWindow.
+       *
+       * Chỉ nhận READY từ domain Google Apps Script /
+       * Googleusercontent để tránh message ngoài ý muốn.
+       */
       window.addEventListener(
         'message',
         function (event) {
 
-          if (event.source !== app.contentWindow) {
+          if (
+            !event.data ||
+            event.data.type !== 'HTV_HRM_READY'
+          ) {
             return;
           }
 
-          if (
-            event.data &&
-            event.data.type === 'HTV_HRM_READY'
-          ) {
-            moApp();
+          var origin = String(event.origin || '');
+
+          var laGoogle =
+            origin === 'https://script.google.com' ||
+            /^https:\/\/[^/]*googleusercontent\.com$/i.test(origin);
+
+          if (!laGoogle) {
+            return;
           }
 
+          moApp();
         }
       );
 
 
       /*
-       * Khi Apps Script tải xong thì mở app ngay.
-       * Không chờ 15 giây fallback nữa.
-       *
-       * Phần Index Apps Script hiện đã tự reset toàn bộ modal,
-       * nên không cần ép URL mới bằng timestamp ở mỗi lần mở.
+       * Fallback 1:
+       * nếu browser không chuyển postMessage từ nested iframe,
+       * onload của iframe vẫn mở được app.
        */
       app.addEventListener(
         'load',
         function () {
-          setTimeout(moApp, 120);
+          setTimeout(moApp, 80);
         },
         { once: true }
       );
 
 
       /*
-       * Dùng URL deployment ổn định để trình duyệt có thể tận dụng
-       * kết nối/cache thay vì ép tải mới hoàn toàn mỗi lần.
+       * Không gắn timestamp vào URL.
+       * Giữ URL ổn định để điện thoại tận dụng DNS/TLS/cache.
        */
       app.src = APP_URL;
 
@@ -421,12 +424,12 @@
 
 
       /*
-       * Fallback cuối cùng nếu WebView rất bất thường.
-       * Bình thường sẽ không bao giờ phải đợi tới mốc này.
+       * Fallback cuối cùng.
+       * Bình thường READY/onload sẽ chạy trước rất lâu.
        */
       setTimeout(
         moApp,
-        8000
+        6000
       );
 
     })();
