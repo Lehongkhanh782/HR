@@ -120,8 +120,11 @@
         localStorage.setItem(KHOA_PHIEN, String(d.token));
             } else if (d.type === 'HTV_XOA_PHIEN') {
         localStorage.removeItem(KHOA_PHIEN);
-      } else if (d.type === 'HTV_XIN_QUYEN_THONG_BAO') {
+            } else if (d.type === 'HTV_XIN_QUYEN_THONG_BAO') {
         xinQuyenThongBao(e.source, e.origin);
+      } else if (d.type === 'HTV_HOI_QUYEN_THONG_BAO') {
+        var trangThai = ('Notification' in window) ? Notification.permission : 'khong_ho_tro';
+        e.source.postMessage({ type: 'HTV_TRA_LOI_QUYEN_THONG_BAO', trangThai: trangThai }, e.origin);
       }
     } catch (x) {}
   });
