@@ -8,7 +8,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="HTV HR">
 <meta name="theme-color" content="#4A1520">
+<link rel="manifest" href="/manifest.json">
 <title>HTV HR</title>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-messaging-compat.js"></script>
 <link rel="apple-touch-icon" sizes="180x180"
       href="https://lh3.googleusercontent.com/d/1XXbdoGTqfp6bRR_baYsr0GvQ8uRei4d_">
 <link rel="icon" type="image/png"
@@ -56,6 +59,49 @@
   /* ===== GHI NHỚ ĐĂNG NHẬP: cất mã phiên của hệ thống trên thiết bị này ===== */
   var KHOA_PHIEN = 'htv_phien_v1';
 
+  /* ===== THÔNG BÁO ĐẨY: xin quyền và lấy token khi được yêu cầu từ bên trong app ===== */
+  try {
+    firebase.initializeApp({
+      apiKey: "AIzaSyBnb2O9FP2uwLrAUKZKmshsSiSODz1uGxw",
+      authDomain: "htv-hr-thongbao.firebaseapp.com",
+      projectId: "htv-hr-thongbao",
+      storageBucket: "htv-hr-thongbao.firebasestorage.app",
+      messagingSenderId: "777531029266",
+      appId: "1:777531029266:web:928792dc92ac58f4b925cb"
+    });
+  } catch (x) {}
+
+  function baoKetQuaThongBao(nguoiGui, nguonGui, ketQua, token) {
+    try { nguoiGui.postMessage({ type: 'HTV_KET_QUA_THONG_BAO', ketQua: ketQua, token: token || '' }, nguonGui); } catch (x) {}
+  }
+
+  function xinQuyenThongBao(nguoiGui, nguonGui) {
+    if (!('Notification' in window) || !('serviceWorker' in navigator)) {
+      baoKetQuaThongBao(nguoiGui, nguonGui, 'KHONG_HO_TRO');
+      return;
+    }
+    Notification.requestPermission().then(function (quyen) {
+      if (quyen !== 'granted') {
+        baoKetQuaThongBao(nguoiGui, nguonGui, 'TU_CHOI');
+        return;
+      }
+      navigator.serviceWorker.register('/firebase-messaging-sw.js').then(function (dangKy) {
+        var messaging = firebase.messaging();
+        messaging.getToken({
+          vapidKey: 'BKJOTX1sOOwRmNfCV2OaHZmemZsjosqYBaCOobQZWSnmvhvDOx-HVe3BQSwnNd1W-DBSo0k5_oXslA2klRBRpco',
+          serviceWorkerRegistration: dangKy
+        }).then(function (token) {
+          if (token) baoKetQuaThongBao(nguoiGui, nguonGui, 'THANH_CONG', token);
+          else baoKetQuaThongBao(nguoiGui, nguonGui, 'LOI');
+        }).catch(function () {
+          baoKetQuaThongBao(nguoiGui, nguonGui, 'LOI');
+        });
+      }).catch(function () {
+        baoKetQuaThongBao(nguoiGui, nguonGui, 'LOI');
+      });
+    });
+  }
+
   // Chỉ trao đổi với nội dung của Google Apps Script (hệ thống nhân sự)
   function nguonHopLe(nguon) {
     return /^https:\/\/[a-z0-9-]+\.googleusercontent\.com$/.test(nguon)
@@ -72,8 +118,10 @@
         e.source.postMessage({ type: 'HTV_PHIEN', token: token }, e.origin);
       } else if (d.type === 'HTV_LUU_PHIEN' && d.token) {
         localStorage.setItem(KHOA_PHIEN, String(d.token));
-      } else if (d.type === 'HTV_XOA_PHIEN') {
+            } else if (d.type === 'HTV_XOA_PHIEN') {
         localStorage.removeItem(KHOA_PHIEN);
+      } else if (d.type === 'HTV_XIN_QUYEN_THONG_BAO') {
+        xinQuyenThongBao(e.source, e.origin);
       }
     } catch (x) {}
   });
