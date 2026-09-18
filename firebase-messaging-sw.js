@@ -13,8 +13,9 @@ firebase.initializeApp({
 const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage(function (payload) {
-  var tieuDe = (payload.notification && payload.notification.title) || 'HTV HR';
-  var noiDung = (payload.notification && payload.notification.body) || '';
+  var d = payload.data || {};
+  var tieuDe = d.title || 'HTV HR';
+  var noiDung = d.body || '';
   self.registration.showNotification(tieuDe, {
     body: noiDung,
     icon: 'https://lh3.googleusercontent.com/d/1NmEtOM0IPmywMgJoaFKmSWCzNIWRTtJF',
