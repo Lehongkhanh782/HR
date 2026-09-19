@@ -59,6 +59,19 @@
   /* ===== GHI NHỚ ĐĂNG NHẬP: cất mã phiên của hệ thống trên thiết bị này ===== */
   var KHOA_PHIEN = 'htv_phien_v1';
 
+  /* ===== NHẮC THÊM APP VÀO MÀN HÌNH CHÍNH: nhắc mỗi lần đăng nhập nếu chưa cài ===== */
+  function laDangStandalone() {
+    return window.navigator.standalone === true
+      || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+  }
+
+  function laThietBiOuter() {
+    var ua = navigator.userAgent || '';
+    if (/iPad|iPhone|iPod/.test(ua)) return 'ios';
+    if (/Android/.test(ua)) return 'android';
+    return 'khac';
+  }
+
   /* ===== THÔNG BÁO ĐẨY: xin quyền và lấy token khi được yêu cầu từ bên trong app ===== */
   try {
     firebase.initializeApp({
@@ -122,9 +135,13 @@
         localStorage.removeItem(KHOA_PHIEN);
             } else if (d.type === 'HTV_XIN_QUYEN_THONG_BAO') {
         xinQuyenThongBao(e.source, e.origin);
-      } else if (d.type === 'HTV_HOI_QUYEN_THONG_BAO') {
+            } else if (d.type === 'HTV_HOI_QUYEN_THONG_BAO') {
         var trangThai = ('Notification' in window) ? Notification.permission : 'khong_ho_tro';
         e.source.postMessage({ type: 'HTV_TRA_LOI_QUYEN_THONG_BAO', trangThai: trangThai }, e.origin);
+      } else if (d.type === 'HTV_HOI_NHAC_CAI_APP') {
+        var thietBi = laThietBiOuter();
+        var doHien = !laDangStandalone() && thietBi !== 'khac';
+        e.source.postMessage({ type: 'HTV_TRA_LOI_NHAC_CAI_APP', doHienNhac: doHien, thietBi: thietBi }, e.origin);
       }
     } catch (x) {}
   });
