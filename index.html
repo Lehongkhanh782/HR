@@ -138,10 +138,26 @@
             } else if (d.type === 'HTV_HOI_QUYEN_THONG_BAO') {
         var trangThai = ('Notification' in window) ? Notification.permission : 'khong_ho_tro';
         e.source.postMessage({ type: 'HTV_TRA_LOI_QUYEN_THONG_BAO', trangThai: trangThai }, e.origin);
-      } else if (d.type === 'HTV_HOI_NHAC_CAI_APP') {
+            } else if (d.type === 'HTV_HOI_NHAC_CAI_APP') {
         var thietBi = laThietBiOuter();
         var doHien = !laDangStandalone() && thietBi !== 'khac';
         e.source.postMessage({ type: 'HTV_TRA_LOI_NHAC_CAI_APP', doHienNhac: doHien, thietBi: thietBi }, e.origin);
+      } else if (d.type === 'HTV_XIN_VI_TRI') {
+        var idViTri = d.requestId;
+        if (!navigator.geolocation) {
+          e.source.postMessage({ type: 'HTV_KET_QUA_VI_TRI', requestId: idViTri, loi: 'KHONG_HO_TRO' }, e.origin);
+        } else {
+          navigator.geolocation.getCurrentPosition(
+            function (vt) {
+              e.source.postMessage({ type: 'HTV_KET_QUA_VI_TRI', requestId: idViTri,
+                viDo: vt.coords.latitude, kinhDo: vt.coords.longitude }, e.origin);
+            },
+            function (err) {
+              e.source.postMessage({ type: 'HTV_KET_QUA_VI_TRI', requestId: idViTri, loiMa: err.code }, e.origin);
+            },
+            { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+          );
+        }
       }
     } catch (x) {}
   });
